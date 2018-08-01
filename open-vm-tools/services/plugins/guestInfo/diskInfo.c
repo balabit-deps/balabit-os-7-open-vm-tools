@@ -1,5 +1,5 @@
 /*********************************************************
- * Copyright (C) 2014-2017 VMware, Inc. All rights reserved.
+ * Copyright (C) 2014-2018 VMware, Inc. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published
@@ -90,7 +90,7 @@ GuestInfoGetDiskInfoWiper(Bool includeReserved)  // IN
    GuestDiskInfo *di;
 
    /* Get partition list. */
-   if (!WiperPartition_Open(&pl)) {
+   if (!WiperPartition_Open(&pl, FALSE)) {
       g_warning("GetDiskInfo: ERROR: could not get partition list\n");
       return FALSE;
    }
@@ -133,6 +133,13 @@ GuestInfoGetDiskInfoWiper(Bool includeReserved)  // IN
          partEntry->totalBytes = totalBytes;
 
          di->partitionList = newPartitionList;
+         g_debug("%s added partition #%d %s type %d free %"FMT64"u total %"FMT64"u\n",
+                 __FUNCTION__, partCount, partEntry->name, part->type,
+                 partEntry->freeBytes, partEntry->totalBytes);
+      } else {
+         g_debug("%s ignoring unsupported partition %s %s\n",
+                 __FUNCTION__, part->mountPoint,
+                 part->comment ? part->comment : "");
       }
    }
 

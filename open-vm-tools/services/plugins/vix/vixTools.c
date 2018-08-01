@@ -1,5 +1,5 @@
 /*********************************************************
- * Copyright (C) 2007-2017 VMware, Inc. All rights reserved.
+ * Copyright (C) 2007-2018 VMware, Inc. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published
@@ -91,7 +91,6 @@
 #include "str.h"
 #include "file.h"
 #include "err.h"
-#include "guestInfo.h"  // MAX_VALUE_LEN
 #include "hostinfo.h"
 #include "guest_os.h"
 #include "guest_msg_def.h"
@@ -2510,7 +2509,7 @@ VixTools_GetToolsPropertiesImpl(GKeyFile *confDictRef,            // IN
                                             CONFNAME_SUSPENDSCRIPT, NULL);
    }
 
-   tempDir = File_GetSafeTmpDir(TRUE);
+   tempDir = File_GetSafeRandomTmpDir(TRUE);
 
    /*
     * Now, record these values in a property list.
@@ -7316,7 +7315,7 @@ VixToolsRunScript(VixCommandRequestHeader *requestMsg,  // IN
       /*
        * Don't give up if VixToolsGetUserTmpDir() failed. It might just
        * have failed to load DLLs, so we might be running on Win 9x.
-       * Just fall through to use the old fashioned File_GetSafeTmpDir().
+       * Just fall through to use the old fashioned File_GetSafeRandomTmpDir().
        */
 
       err = VIX_OK;
@@ -7324,13 +7323,14 @@ VixToolsRunScript(VixCommandRequestHeader *requestMsg,  // IN
 #endif
 
    if (NULL == tempDirPath) {
-      tempDirPath = File_GetSafeTmpDir(TRUE);
+      tempDirPath = File_GetSafeRandomTmpDir(TRUE);
+
       if (NULL == tempDirPath) {
          err = FoundryToolsDaemon_TranslateSystemErr();
          goto abort;
       }
    }
-   for (var = 0; var <= 0xFFFFFFFF; var++) {
+   for (var = 0; var < MAX_INT32; var++) {
       free(tempScriptFilePath);
       tempScriptFilePath = Str_SafeAsprintf(NULL,
                                             "%s"DIRSEPS"%s%d%s",
@@ -8360,7 +8360,8 @@ VixToolsGetTempFile(VixCommandRequestHeader *requestMsg,   // IN
          /*
           * Don't give up if VixToolsGetUserTmpDir() failed. It might just
           * have failed to load DLLs, so we might be running on Win 9x.
-          * Just fall through to use the old fashioned File_GetSafeTmpDir().
+          * Just fall through to use the old fashioned
+          * File_GetSafeRandomTmpDir().
           */
 
          ASSERT(directoryPath == NULL);
@@ -8374,7 +8375,7 @@ VixToolsGetTempFile(VixCommandRequestHeader *requestMsg,   // IN
       if (!strcmp(directoryPath, "")) {
          free(directoryPath);
          directoryPath = NULL;
-         directoryPath = File_GetSafeTmpDir(TRUE);
+         directoryPath = File_GetSafeRandomTmpDir(TRUE);
       }
 
       /*
@@ -10131,7 +10132,7 @@ abort:
    struct passwd pwd;
    struct passwd *ppwd = &pwd;
    char *buffer = NULL; // a pool of memory for Posix_Getpwnam_r() to use.
-   size_t bufferSize;
+   long bufferSize;
 
    /*
     * For POSIX systems, look up the uid of 'username', and compare
@@ -10144,9 +10145,15 @@ abort:
     * Multiply by 4 to compensate for the conversion to UTF-8 by
     * the Posix_Getpwnam_r() wrapper.
     */
-   bufferSize = (size_t) sysconf(_SC_GETPW_R_SIZE_MAX) * 4;
+   errno = 0;
+   bufferSize = sysconf(_SC_GETPW_R_SIZE_MAX);
+   if ((errno != 0) || (bufferSize <= 0)) {
+      bufferSize = 16 * 1024;  // Unlimited; pick something reasonable
+   }
 
-   buffer = Util_SafeMalloc(bufferSize);
+   bufferSize *= 4;
+
+   buffer = Util_SafeMalloc((size_t)bufferSize);
 
    if (Posix_Getpwnam_r(username, &pwd, buffer, bufferSize, &ppwd) != 0 ||
        NULL == ppwd) {

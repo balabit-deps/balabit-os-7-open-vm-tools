@@ -1,3 +1,28 @@
+open-vm-tools (2:10.3.0-0ubuntu1~18.04.1) bionic; urgency=medium
+
+  * Merge with Upstream Tag stable-10.3.0 (LP: #1784638) from
+    https://github.com/vmware/open-vm-tools/releases/tag/stable-10.3.0
+    Remaining changes:
+    - Disable PrivateTmp for the open-vm-tools.service as it triggers issues
+      when triggering processes that need tmp through VMOMI API (LP: 1758428)
+  * Added changes:
+    - d/p/debian/enable_vmhgfs-fuse_by_default: update to match changes in 10.3
+      (Upstream changed the entry level from 4.0 to 3.10 - could be dropped,
+       but stay close to what Debian has for now)
+    - d/p/debian/scsi-udev-rule: update to match changes in 10.3 (DEVTYPE check
+      added upstream)
+
+ -- Christian Ehrhardt <christian.ehrhardt@canonical.com>  Wed, 01 Aug 2018 08:16:10 +0200
+
+open-vm-tools (2:10.2.5-1) unstable; urgency=medium
+
+  * [ea03a58] Update upstream source from tag 'upstream/10.2.5'
+    Update to upstream version '10.2.5'
+    with Debian dir 74e96286320224bb6d5b717034930169514dbd51
+  * [c1c18d3] Refreshing patches.
+
+ -- Bernd Zeimetz <bzed@debian.org>  Fri, 06 Apr 2018 11:18:50 +0200
+
 open-vm-tools (2:10.2.0-3ubuntu3) bionic; urgency=medium
 
   * Disable PrivateTmp for the open-vm-tools.service as it triggers issues

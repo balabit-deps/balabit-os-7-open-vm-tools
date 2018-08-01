@@ -5,7 +5,7 @@
     }
  
 +/*
-    if (release < KERNEL_RELEASE(4, 0, 0)) {
+    if (release < KERNEL_RELEASE(3, 10, 0)) {
        fprintf(stderr, "%s: incompatible kernel version %02d.%02d.%02d\n",
                __func__, k[0], k[1], k[2]);
        goto exit;
