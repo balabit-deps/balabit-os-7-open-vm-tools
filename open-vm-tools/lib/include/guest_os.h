@@ -1,5 +1,5 @@
 /*********************************************************
- * Copyright (C) 1998-2017 VMware, Inc. All rights reserved.
+ * Copyright (C) 1998-2018 VMware, Inc. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published
@@ -186,10 +186,11 @@ Bool Gos_InSetArray(uint32 gos, const uint32 *set);
 #define ALL4XLINUX32          BS(OTHER4XLINUX)
 
 #define ALL4XLINUX64          BS(OTHER4XLINUX_64), BS(PHOTON_64), \
-                              BS(CENTOS8_64), BS(ORACLE8_64)
+                              BS(CENTOS8_64), BS(ORACLE8_64), \
+                              BS(AMAZONLINUX2_64)
 
 #define ALLVMKERNEL           BS(VMKERNEL), BS(VMKERNEL5), BS(VMKERNEL6), \
-                              BS(VMKERNEL65)
+                              BS(VMKERNEL65), BS(VMKERNEL7)
 
 #define ALLLINUX32            BS(OTHER24XLINUX), ALL26XLINUX32, ALL3XLINUX32, \
                               ALL4XLINUX32, BS(OTHERLINUX), BS(VMKERNEL)
@@ -203,9 +204,10 @@ Bool Gos_InSetArray(uint32 gos, const uint32 *set);
                               BS(DARWIN15_64), BS(DARWIN16_64), \
                               BS(DARWIN17_64), BS(DARWIN18_64)
 #define ALLDARWIN             ALLDARWIN32, ALLDARWIN64
-#define ALL64                 ALLWIN64, ALLLINUX64, BS(SOLARIS10_64), \
-                              BS(FREEBSD_64), BS(FREEBSD11_64),       \
-                              BS(FREEBSD12_64), BS(OTHER_64),         \
+#define ALL64                 ALLWIN64, ALLLINUX64,               \
+                              BS(SOLARIS10_64), BS(SOLARIS11_64), \
+                              BS(FREEBSD_64), BS(FREEBSD11_64),   \
+                              BS(FREEBSD12_64), BS(OTHER_64),     \
                               ALLDARWIN64, ALLVMKERNEL
 
 #define ALLECOMSTATION        BS(ECOMSTATION), BS(ECOMSTATION2)
@@ -217,12 +219,10 @@ Bool Gos_InSetArray(uint32 gos, const uint32 *set);
  */
 
 /* vmkernel (ESX) */
-#define STR_OS_ESX_4               "VMware ESX/ESXi 4.x"
-#define STR_OS_ESX_5               "VMware ESXi 5.x"
-#define STR_OS_ESX_6               "VMware ESXi 6.0"
-#define STR_OS_ESX_65              "VMware ESXi 6.5"
+#define STR_OS_VMKERNEL            "vmkernel"
 
 /* Linux */
+#define STR_OS_AMAZON_LINUX        "amazonlinux"
 #define STR_OS_ANNVIX              "Annvix"
 #define STR_OS_ARCH                "Arch"
 #define STR_OS_ARKLINUX            "Arklinux"
