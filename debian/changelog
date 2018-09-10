@@ -1,3 +1,14 @@
+open-vm-tools (2:10.3.0-0ubuntu1~18.04.2) bionic; urgency=medium
+
+  * d/p/ubuntu/lp-1791220-Disable-hgfsServer-not-VMware.patch: avoid crashing
+    with segfaults when force starting the service in non VMWare environments.
+    (LP: #1791220)
+  * d/p/debian/scsi-udev-rule: fix applying of the scsi timeout (LP: #1790145)
+    - revert "update to match changes in 10.3 (DEVTYPE checkadded upstream)"
+    - refresh patch context to match upstream version 10.3
+
+ -- Christian Ehrhardt <christian.ehrhardt@canonical.com>  Mon, 10 Sep 2018 09:33:13 +0200
+
 open-vm-tools (2:10.3.0-0ubuntu1~18.04.1) bionic; urgency=medium
 
   * Merge with Upstream Tag stable-10.3.0 (LP: #1784638) from

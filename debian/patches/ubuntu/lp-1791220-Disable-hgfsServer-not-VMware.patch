@@ -1,0 +1,39 @@
+From ebf08325adf874723c86aa313954492101117934 Mon Sep 17 00:00:00 2001
+From: Oliver Kurth <okurth@vmware.com>
+Date: Wed, 29 Aug 2018 13:29:44 -0700
+Subject: [PATCH] Disable hgfsServer plugin when not running in a VMware VM.
+
+VmCheck_GetVersion() accesses Backdoor in an unsafe manner
+which is not expected to work on non-VMware environments
+including physical machines. So, we need to make sure that
+VmCheck_GetVersion() is called only when we are running in
+a VMware VM.
+---
+Origin: backport, https://github.com/vmware/open-vm-tools/commit/ebf08325adf874723c86aa313954492101117934
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1791220
+
+Last-Update: 2018-05-19
+ open-vm-tools/services/plugins/hgfsServer/hgfsPlugin.c | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/open-vm-tools/services/plugins/hgfsServer/hgfsPlugin.c b/open-vm-tools/services/plugins/hgfsServer/hgfsPlugin.c
+index c5ef8726b..129fa7504 100644
+--- a/open-vm-tools/services/plugins/hgfsServer/hgfsPlugin.c
++++ b/open-vm-tools/services/plugins/hgfsServer/hgfsPlugin.c
+@@ -1089,6 +1089,13 @@ ToolsOnLoad(ToolsAppCtx *ctx)
+       return NULL;
+    }
+ 
++   /*
++    * If not running in a VMware VM, return NULL to disable the plugin.
++    */
++   if (!ctx->isVMware) {
++      return NULL;
++   }
++
+    /*
+     * Check for VM is running in a hosted environment and if so initialize
+     * the Shared Folders HGFS client redirector.
+-- 
+2.17.1
+
