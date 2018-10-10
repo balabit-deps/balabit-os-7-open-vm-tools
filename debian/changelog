@@ -1,3 +1,10 @@
+open-vm-tools (2:10.3.0-0ubuntu1~18.04.3) bionic; urgency=medium
+
+  * d/p/lp-1793219-fix-stats-overflow.patch: fix potential overflow of 32 bit
+    /proc values (LP: #1793219)
+
+ -- Christian Ehrhardt <christian.ehrhardt@canonical.com>  Wed, 10 Oct 2018 13:25:49 +0200
+
 open-vm-tools (2:10.3.0-0ubuntu1~18.04.2) bionic; urgency=medium
 
   * d/p/ubuntu/lp-1791220-Disable-hgfsServer-not-VMware.patch: avoid crashing

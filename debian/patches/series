@@ -3,3 +3,4 @@ debian/max_nic_count
 debian/enable_vmhgfs-fuse_by_default
 debian/scsi-udev-rule
 ubuntu/lp-1791220-Disable-hgfsServer-not-VMware.patch
+lp-1793219-fix-stats-overflow.patch
