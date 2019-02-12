@@ -1,36 +1,142 @@
-open-vm-tools (2:10.3.0-0ubuntu1~18.04.3) bionic; urgency=medium
+open-vm-tools (2:10.3.5-7~ubuntu0.18.04.1) bionic; urgency=medium
 
-  * d/p/lp-1793219-fix-stats-overflow.patch: fix potential overflow of 32 bit
-    /proc values (LP: #1793219)
+  * Backport recent open-vm-tools (LP: #1813944)
+    - also adresses handling of quiesced snapshot failures (LP: #1814832)
+    - also adresses issues with resolutionKMS plugins sometimes fails to
+      load at boot (LP: #1818473)
 
- -- Christian Ehrhardt <christian.ehrhardt@canonical.com>  Wed, 10 Oct 2018 13:25:49 +0200
+ -- Christian Ehrhardt <christian.ehrhardt@canonical.com>  Tue, 12 Feb 2019 09:55:41 +0100
 
-open-vm-tools (2:10.3.0-0ubuntu1~18.04.2) bionic; urgency=medium
+open-vm-tools (2:10.3.5-7) unstable; urgency=medium
 
-  * d/p/ubuntu/lp-1791220-Disable-hgfsServer-not-VMware.patch: avoid crashing
-    with segfaults when force starting the service in non VMWare environments.
-    (LP: #1791220)
-  * d/p/debian/scsi-udev-rule: fix applying of the scsi timeout (LP: #1790145)
-    - revert "update to match changes in 10.3 (DEVTYPE checkadded upstream)"
-    - refresh patch context to match upstream version 10.3
+  [ Christian Ehrhardt ]
+  * [71b468f] make vgauth service execution more reliable.
+    Since d3d47039 "Start vgauth before vmtoolsd" there is a potential race
+    of starting vgauth so early that it might have issues. This was
+    discussed back in the day in [1] to [2], but confirmed to be ok by
+    VMWare.
+    We were all somewhat convinced by this, but a bad feeling remained not
+    only with me but also with Bernd [4].
+    A recent SRU review denial made me rethink all of it and I think we can
+    make it safer without thwarting the purpose of the original change.
+    Note: Disambiguation of service names used below:
+    vgauth     - open-vm-tools.vgauth.service
+    vmtoolsd   - open-vm-tools.service
+    fs         - systemd-remount-fs.service
+    tmp        - systemd-tmpfiles-setup.service
+    cloud-init - cloud-init-local.service
+    Currently we have these dependency requirements:
+    - vgauth should be before vmtoolsd
+    - cloud init should be before vmtoolsd
+    - cloud init has to be really early in general
+      - therefore this is using DefaultDependencies=No
+    That lead to this graph:
+     fs / tmp -> vmtoolsd -> cloud-init
+    And d3d47039 added it to be like:
+     fs / tmp -> vmtoolsd -> cloud-init
+                   ^
+     vgauth      --|
+    But there is no need to have vgauth without any pre-dependencies at all.
+    It is only needed to be "before" vmtoolsd, therefore we can make it:
+     fs / tmp -> vgauth -> vmtoolsd -> cloud-init
+    That will make execution of vgauth much less error-prone (even though I
+    have no hard issue to report) while at the same time holding up all
+    known required ordering constraints.
+    [1]: https://bugs.launchpad.net/ubuntu/+source/open-vm-tools/+bug/1804287/comments/3
+    [2]: https://bugs.launchpad.net/ubuntu/+source/open-vm-tools/+bug/1804287/comments/12
+    [3]: https://bugs.launchpad.net/ubuntu/+source/open-vm-tools/+bug/1804287/comments/25
+    [4]: https://github.com/bzed/pkg-open-vm-tools/pull/15#issuecomment-447237910
+    Signed-off-by: Christian Ehrhardt <christian.ehrhardt@canonical.com>
 
- -- Christian Ehrhardt <christian.ehrhardt@canonical.com>  Mon, 10 Sep 2018 09:33:13 +0200
+ -- Bernd Zeimetz <bzed@debian.org>  Mon, 04 Mar 2019 20:02:52 +0100
 
-open-vm-tools (2:10.3.0-0ubuntu1~18.04.1) bionic; urgency=medium
+open-vm-tools (2:10.3.5-6) unstable; urgency=medium
 
-  * Merge with Upstream Tag stable-10.3.0 (LP: #1784638) from
-    https://github.com/vmware/open-vm-tools/releases/tag/stable-10.3.0
-    Remaining changes:
-    - Disable PrivateTmp for the open-vm-tools.service as it triggers issues
-      when triggering processes that need tmp through VMOMI API (LP: 1758428)
-  * Added changes:
-    - d/p/debian/enable_vmhgfs-fuse_by_default: update to match changes in 10.3
-      (Upstream changed the entry level from 4.0 to 3.10 - could be dropped,
-       but stay close to what Debian has for now)
-    - d/p/debian/scsi-udev-rule: update to match changes in 10.3 (DEVTYPE check
-      added upstream)
+  * [43ec618] Correct and/or improve handling of certain quiesced
+    snapshot failures.
+    Thanks to Oliver Kurth (Closes: #921470)
 
- -- Christian Ehrhardt <christian.ehrhardt@canonical.com>  Wed, 01 Aug 2018 08:16:10 +0200
+ -- Bernd Zeimetz <bzed@debian.org>  Mon, 11 Feb 2019 14:58:28 +0100
+
+open-vm-tools (2:10.3.5-5) unstable; urgency=medium
+
+  * [54cce3e] Start vmtoolsd after apparmor.service.
+    Github issue #17
+
+ -- Bernd Zeimetz <bzed@debian.org>  Thu, 31 Jan 2019 13:13:06 +0100
+
+open-vm-tools (2:10.3.5-4) unstable; urgency=medium
+
+  [ Alf Gaida ]
+  * [e13792d] udevadm trigger should not fail (Closes: #917642)
+
+ -- Bernd Zeimetz <bzed@debian.org>  Sat, 29 Dec 2018 23:00:37 +0100
+
+open-vm-tools (2:10.3.5-3) unstable; urgency=medium
+
+  [ Christian Ehrhardt ]
+  * [d3d4703] Start vgauth before vmtoolsd.
+    VGAuthService needs to be ready when vmtoolsd runs. Certain cases - e.g.
+    Site Recovery Manager failover - will need vgauth to be up.
+    Therefore add an After=vgauth.service dependency to open-vm-tools.service
+    To have vgauth be able start early - and not pull cloud-init back late - it
+    is also required to drop default dependencies which according to VMware is
+    fine to do so.
+    (LP: #1804287)
+
+ -- Bernd Zeimetz <bzed@debian.org>  Fri, 14 Dec 2018 09:55:04 +0100
+
+open-vm-tools (2:10.3.5-2) unstable; urgency=medium
+
+  [ Raphaël Hertzog ]
+  * [db2a364] Ensure vmwgfx module is loaded before start of vmtoolsd.
+    This avoids a failure to start the resolutionKMS plugin and it's
+    achieved through a drop-in snippet extending open-vm-tools.service
+    adding an ExecStartPre directive loading the module prior to
+    the start of the service. (Closes: #915031)
+
+  [ Christian Ehrhardt ]
+  * [e6e0ab8] d/rules: fix dangling symlink of vmware-user.
+    Back in 2:9.4.0-1280544-6 vmware-user* was moved to the
+    open-vm-tools-desktop package and some follow on fixes moved bits that
+    were forgotten like the man page.
+    (LP: #1807441)
+    There still is a symlink in /usr/bin/vmware-user that is forgotten in
+    the base package and broken unless open-vm-tools-desktop is installed.
+    Change d/rules to move the symlink as well.
+    Signed-off-by: Christian Ehrhardt <christian.ehrhardt@canonical.com>
+  * [13d22e5] Breaks and Replaces for moving vmware-user.
+    Signed-off-by: Christian Ehrhardt <christian.ehrhardt@canonical.com>
+  * [d56826a] Bump breaks and replaces to next version to be released.
+    Signed-off-by: Christian Ehrhardt <christian.ehrhardt@canonical.com>
+
+  [ Bernd Zeimetz ]
+  * [e4697c7] Fix race condition between open-vm-tools and systemd-tmpfiles-setup.
+    Thanks to Jean-Louis Dupond (Closes: #914910)
+
+ -- Bernd Zeimetz <bzed@debian.org>  Tue, 11 Dec 2018 20:40:48 +0100
+
+open-vm-tools (2:10.3.5-1) unstable; urgency=medium
+
+  * [7061cb7] Update upstream source from tag 'upstream/10.3.5'
+    Update to upstream version '10.3.5'
+    with Debian dir 9315f58cab8ba1356c1e4aa77d714257dc0651f2
+
+ -- Bernd Zeimetz <bzed@debian.org>  Fri, 09 Nov 2018 11:32:15 +0100
+
+open-vm-tools (2:10.3.0-1) unstable; urgency=medium
+
+  * [16acbc3] Remove PrivateTmp=yes.
+    Thanks to Christian Ehrhardt (Closes: #905170)
+  * [72aabb2] Add RequiresMountsFor=/tmp.
+    Thanks to Christopher Odenbach (Closes: #900566)
+  * [96bf0c5] Update upstream source from tag 'upstream/10.3.0'
+    Update to upstream version '10.3.0'
+    with Debian dir ace0137b2d17e039ddac188fdcd15f882119925a
+  * [e5a9b82] Re-add .travis.yml
+  * [83e043f] Refreshing patches
+
+ -- Bernd Zeimetz <bzed@debian.org>  Tue, 07 Aug 2018 23:41:00 +0200
 
 open-vm-tools (2:10.2.5-1) unstable; urgency=medium
 
@@ -40,28 +146,6 @@ open-vm-tools (2:10.2.5-1) unstable; urgency=medium
   * [c1c18d3] Refreshing patches.
 
  -- Bernd Zeimetz <bzed@debian.org>  Fri, 06 Apr 2018 11:18:50 +0200
-
-open-vm-tools (2:10.2.0-3ubuntu3) bionic; urgency=medium
-
-  * Disable PrivateTmp for the open-vm-tools.service as it triggers issues
-    when triggering processes that need tmp through VMOMI API (LP: #1758428)
-
- -- Christian Ehrhardt <christian.ehrhardt@canonical.com>  Thu, 19 Apr 2018 11:23:58 +0200
-
-open-vm-tools (2:10.2.0-3ubuntu2) bionic; urgency=medium
-
-  * Revert change in d/open-vm-tools.service that added After=local-fs.target.
-    It turned out that the systemd in bionic already implicitly fixes
-    this issue (the change is still needed for backports) (LP: 1750780)
-
- -- Christian Ehrhardt <christian.ehrhardt@canonical.com>  Tue, 27 Feb 2018 08:03:13 +0100
-
-open-vm-tools (2:10.2.0-3ubuntu1) bionic; urgency=medium
-
-  * d/open-vm-tools.service: Add After=local-fs.target dependency ensuring
-    filesystems are ready to fix a race on startup (LP: #1750780)
-
- -- Christian Ehrhardt <christian.ehrhardt@canonical.com>  Thu, 22 Feb 2018 08:39:26 +0100
 
 open-vm-tools (2:10.2.0-3) unstable; urgency=medium
 
