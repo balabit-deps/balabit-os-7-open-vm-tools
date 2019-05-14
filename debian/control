@@ -1,8 +1,7 @@
 Source: open-vm-tools
 Section: admin
 Priority: extra
-Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
-XSBC-Original-Maintainer: Bernd Zeimetz <bzed@debian.org>
+Maintainer: Bernd Zeimetz <bzed@debian.org>
 Build-Depends:
  debhelper (>= 11~), autotools-dev, doxygen, libcunit1-dev,
  libdumbnet-dev, libfuse-dev, libgtkmm-3.0-dev, libgtk-3-dev,
@@ -44,6 +43,7 @@ Recommends:
  xauth, xserver-xorg-input-vmmouse,
  xserver-xorg-video-vmware
 Suggests: xdg-utils
+XB-Modaliases: ${modaliases}
 Description: Open VMware Tools for virtual machines hosted on VMware (GUI)
  The Open Virtual Machine Tools (open-vm-tools) project is an open source
  implementation of VMware Tools. It is a suite of virtualization utilities and
