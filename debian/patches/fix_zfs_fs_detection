@@ -1,0 +1,13 @@
+--- a/open-vm-tools/services/plugins/guestInfo/diskInfo.c
++++ b/open-vm-tools/services/plugins/guestInfo/diskInfo.c
+@@ -826,8 +826,9 @@ GuestInfoGetDiskDevice(const char *fsNam
+       /* Not an LVM; check if a basic block device. */
+       char blockDevPath[PATH_MAX];
+ 
++         char* x = strrchr(fsName, '/');
+       Str_Snprintf(blockDevPath, PATH_MAX,  "%s/%s", LINUX_SYS_BLOCK_DIR,
+-                   strrchr(fsName, '/') + 1);
++                   x != NULL ? x+1 : "");
+       GuestInfoLinuxBlockDevice(blockDevPath, partEntry, 1 /* first and only*/);
+    }
+ 

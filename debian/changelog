@@ -1,8 +1,119 @@
-open-vm-tools (2:10.3.10-1~ubuntu0.18.04.1) bionic; urgency=medium
+open-vm-tools (2:11.0.1-2ubuntu0.18.04.2) bionic; urgency=medium
 
-  * Backport recent open-vm-tools (LP: #1822204)
+  * d/p/lp-1855686-Avoid-vmtoolsd-crash-in-HostInfo.patch: fix crash with
+    uncommon lsb_output behavior (LP: #1855686)
 
- -- Christian Ehrhardt <christian.ehrhardt@canonical.com>  Tue, 14 May 2019 09:07:32 +0200
+ -- Christian Ehrhardt <christian.ehrhardt@canonical.com>  Mon, 09 Dec 2019 11:03:56 +0100
+
+open-vm-tools (2:11.0.1-2ubuntu0.18.04.1) bionic; urgency=medium
+
+  * Update to latest release v11 (LP: #1844834)
+    - d/rules: Revert "Enable all compiler errors again" for the older
+      compiler
+
+ -- Christian Ehrhardt <christian.ehrhardt@canonical.com>  Wed, 30 Oct 2019 09:58:25 +0100
+
+open-vm-tools (2:11.0.1-2) unstable; urgency=medium
+
+  * [76c600f] Fix segfault for fs devices without /
+    See https://github.com/vmware/open-vm-tools/issues/378 for details.
+    Thanks to Mo Zhou (Closes: #942692)
+
+ -- Bernd Zeimetz <bzed@debian.org>  Tue, 22 Oct 2019 15:48:48 +0200
+
+open-vm-tools (2:11.0.1-1) unstable; urgency=medium
+
+  * [bb36e10] Update upstream source from tag 'upstream/11.0.1'
+    Update to upstream version '11.0.1'
+    with Debian dir 60c0d512096774b9a2a7cc9e4e94556b2893ae8a
+
+ -- Bernd Zeimetz <bzed@debian.org>  Tue, 22 Oct 2019 09:40:50 +0200
+
+open-vm-tools (2:11.0.0-2) unstable; urgency=medium
+
+  * [4cfe383] Update Vcs-Git/Browser to point to salsa.
+  * [bc253ad] Remove .travis.yml, add debian/.gitlab-ci.yml
+  * [c92ca3a] Add add_patch.sh script to add patches from upstream.
+  * [1d9b491] Add patch to remove deprecated inline functions
+  * [3e2e307] Rename lintian-override file properly
+
+ -- Bernd Zeimetz <bzed@debian.org>  Tue, 15 Oct 2019 23:25:24 +0200
+
+open-vm-tools (2:11.0.0-1) unstable; urgency=medium
+
+  [ goldstar611 ]
+  * [c138871] Ensure VGAuthService starts after AppArmor
+    https://gitlab.com/apparmor/apparmor/issues/13
+
+  [ Bernd Zeimetz ]
+  * [28ef841] New upstream version 11.0.0~0
+  * [f78ed2d] New upstream version 11.0.0
+    Closes: #940853
+  * [19efc80] Revert "Revert "Removing libdumbnet-dev.""
+    This reverts commit 31177fab964d92687501ab81774440a9b8d09e39.
+  * [bc14a8b] snapshot changelog
+  * [1c5e9ea] Dropping patches that were picked from upstream
+
+ -- Bernd Zeimetz <bzed@debian.org>  Mon, 30 Sep 2019 14:37:27 +0200
+
+open-vm-tools (2:10.3.10-3) unstable; urgency=medium
+
+  [ Bernd Zeimetz ]
+  * [19c646a] gcc9 compatibility.
+    Upstream commit c68172ef7f2d4f116078e2aba82986a8cab0b16e (Closes: #925794)
+
+  [ Christian Ehrhardt ]
+  * [865763e] Fix other ftbfs with GCC-9
+    * d/rules: disable address-of-packed-member gcc-9 warnings for pre 11.0 code
+    (LP: #1842301)
+    * d/rules: use modern syntax for disabling deprecated-declarations
+    * d/p/gcc9-Remove-GLib-2.32-deprecated-APIs-from-tools.patch: stop using outdated GLib features
+    Upstream commit a7c141fc
+    * d/p/gcc9-drop-obsolete-G_INLINE_FUNC.patch: stop using deprecated GLib Macro
+    * d/p/gcc9-GStaticRecMutex.patch: stop using deprecated GStaticRecMutex
+    Upstream commit 19ca3e36
+    * d/p/gcc9-build-error-in-vmblocktest.c.patch: avoid error due to stringop-truncation
+    Upstream commit 553d1283
+
+  [ Bernd Zeimetz ]
+  * [0ce2ba2] Policy 4.0.1: The extra priority has been deprecated
+  * [c8760c6] Bumping Standards-Version to 4.4.0
+  * [a6ed8ce] Don't override dh_builddeb.
+    debian-rules-should-not-use-custom-compression-settings
+  * [bdfd8b5] Remove add_patch script
+  * [be4d889] Update copyright years.
+  * [9ac710e] Remove autotools-dev dependency.
+  * [4296cf4] Fix permissions of udev rules file
+  * [ed11c19] A new lintian override
+
+ -- Bernd Zeimetz <bzed@debian.org>  Tue, 03 Sep 2019 18:06:54 +0200
+
+open-vm-tools (2:10.3.10-2) unstable; urgency=medium
+
+  [ Christian Ehrhardt ]
+  * [d79cc9d] d/control: fix postinst missing lsmod/modprobe.
+    Upgrades on open-vm-desktop can trigger errors like the following:
+    /var/lib/dpkg/info/open-vm-tools-desktop.postinst: 5:
+    /var/lib/dpkg/info/open-vm-tools-desktop.postinst: lsmod: not found
+    /var/lib/dpkg/info/open-vm-tools-desktop.postinst: 6:
+    /var/lib/dpkg/info/open-vm-tools-desktop.postinst: modprobe: not found
+    The reason is that kmod isn't a dependency of open-vm-tools-desktop and
+    could be missing e.g. if you installed it in a system container.
+    Once might discuss how useful open-vm-tools-desktop is in that
+    environment but a n issue to fix none the less.
+    Signed-off-by: Christian Ehrhardt <christian.ehrhardt@canonical.com>
+
+  [ Bernd Zeimetz ]
+  * [4d3f25f] Fix guest OS reporting for Debian/Buster.
+    Without this fix, open-vm-tools report other4xLinux64Guest instead of
+    Debian/Buster.
+    Reason is the output of lsb_release, which outputs:
+    $ lsb_release -sd
+    Debian GNU/Linux 10 (buster)
+    But the code in open-vm-tools expects '10.'.
+    Thanks to Oliver Kurth (Closes: #934005)
+
+ -- Bernd Zeimetz <bzed@debian.org>  Wed, 07 Aug 2019 10:28:52 +0200
 
 open-vm-tools (2:10.3.10-1) unstable; urgency=high
 
