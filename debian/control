@@ -13,6 +13,7 @@ Build-Depends:
  libxmlsec1-dev,
  libudev-dev,
  libdrm-dev,
+ liblzma-dev,
 Standards-Version: 4.4.0
 Homepage: https://github.com/vmware/open-vm-tools
 Vcs-Git: https://salsa.debian.org/vmware-packaging-team/pkg-open-vm-tools.git
@@ -20,8 +21,8 @@ Vcs-Browser: https://salsa.debian.org/vmware-packaging-team/pkg-open-vm-tools
 
 Package: open-vm-tools
 Architecture: amd64 i386
-Depends: ${misc:Depends}, ${shlibs:Depends}, pciutils, iproute2
-Recommends: ethtool, zerofree, fuse, lsb-release
+Depends: ${misc:Depends}, ${shlibs:Depends}, pciutils, iproute2, lsb-release
+Recommends: ethtool, zerofree, fuse
 Suggests: open-vm-tools-desktop, cloud-init
 Breaks: open-vm-tools-desktop (<< 2:10.3.5-2~)
 Replaces: open-vm-tools-desktop (<< 2:10.0.7-3227872-2~)
